@@ -6,7 +6,10 @@ const db = new sqlite3.Database(path.join(__dirname, 'rates.db'));
 
 async function updateRates() {
     try {
-        const currencies = ['AUD', 'USD', 'SGD', 'EUR', 'THB', 'JPY', 'TWD', 'CNY'];
+        const currencies = ['AUD', 'USD', 'SGD', 'EUR', 'THB', 'JPY', 'TWD', 'CNY',
+                            'IDR', 'PKR', 'INR', 'PHP', 'NVD', 'CHF', 'GBP', 'CAD',
+                            'BRL', 'HKD'
+                            ];
 
         for (const currency of currencies) {
             console.log(`Scraping rates for ${currency}...`);

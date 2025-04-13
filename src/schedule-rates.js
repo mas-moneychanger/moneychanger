@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const updateRates = require('./update-rates');
 
 // Schedule the updateRates function to run daily at 8:00 AM
-cron.schedule('*/5 * * * *', () => {
+cron.schedule('0 8 * * *', () => {
     console.log('Running daily update at', new Date().toISOString());
     updateRates();
 }, {
