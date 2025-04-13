@@ -27,3 +27,7 @@ app.get('/api/rates', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+app.get('/privacy.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/privacy.html'));
+});

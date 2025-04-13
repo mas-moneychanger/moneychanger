@@ -277,3 +277,32 @@ footer a:hover {
     outline: none;
     border-color: #3b82f6;
 }
+
+.content-with-sidebar {
+    display: flex;
+    gap: 2rem;
+}
+
+.main-content {
+    flex: 3;
+}
+
+.sidebar {
+    flex: 1;
+    max-width: 300px;
+}
+
+.ad-container {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .content-with-sidebar {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        max-width: 100%;
+    }
+}

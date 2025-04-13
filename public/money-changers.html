@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5546736150723146"
+     crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- Navbar Section -->
@@ -53,19 +55,49 @@
                     <option value="Penang">Penang</option>
                 </select>
             </div>
-            <table id="rates-table">
-                <thead>
-                    <tr>
-                        <th>Money Changer</th>
-                        <th>Location</th>
-                        <th>Unit</th>
-                        <th>We Buy (MYR)</th>
-                        <th>We Sell (MYR)</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody id="rates-body"></tbody>
-            </table>
+            <div class="content-with-sidebar">
+                <div class="main-content">
+                    <table id="rates-table">
+                        <thead>
+                            <tr>
+                                <th>Money Changer</th>
+                                <th>Unit</th>
+                                <th>Buy Rate (MYR)</th>
+                                <th>Sell Rate (MYR)</th>
+                                <th>Location</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rates-body"></tbody>
+                    </table>
+                    <!-- Ad below the table -->
+                    <div class="ad-container">
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+                             data-ad-slot="YOUR_AD_SLOT"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                        <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                    </div>
+                </div>
+                <div class="sidebar">
+                    <!-- Sidebar ad -->
+                    <div class="ad-container">
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-5546736150723146"
+                             data-ad-slot="YOUR_SIDEBAR_AD_SLOT"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                        <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -74,6 +106,7 @@
         <div class="container">
             <p>Contact us: <a href="mailto:info@malaysiamoneychanger.com">info@malaysiamoneychanger.com</a></p>
             <p>Disclaimer: Rates are for reference only and may vary. Confirm with money changers directly.</p>
+            <p><a href="/privacy.html">Privacy Policy</a></p>
             <p>© 2025 Malaysia Money Changer. All Rights Reserved.</p>
         </div>
     </footer>
