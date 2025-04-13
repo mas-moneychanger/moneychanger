@@ -88,16 +88,54 @@ async function scrapeRates(currency = 'AUD') {
             return data;
         });
 
-        const ratesWithDetails = rates.map(rate => ({
-            ...rate,
-            currency: currency.toUpperCase(),
-            region: rate.location.includes('Kuala Lumpur') || rate.location.includes('Bukit Bintang') || rate.location.includes('MidValley') || rate.location.includes('NU Sentral') || rate.location.includes('Avenue K') || rate.location.includes('Chow Kit') ? 'KL' :
-                   rate.location.includes('Shah Alam') || rate.location.includes('Seri Kembangan') || rate.location.includes('Puchong') || rate.location.includes('Balakong') ? 'Selangor' :
-                   rate.location.includes('Ipoh') ? 'Ipoh' :
-                   rate.location.includes('Johor') || rate.location.includes('Johor Bahru') ? 'Johor' :
-                   rate.location.includes('Penang') || rate.location.includes('George Town') ? 'Penang' :
-                   'Unknown'
-        }));
+        
+        const ratesWithDetails = rates.map(rate => {
+            const locationLower = rate.location.toLowerCase();
+            
+            // Determine the unit based on currency if not scraped correctly
+    let unit = rate.unit;
+    if (!unit || unit === 'N/A' || unit.trim() === '') {
+        if (['AUD', 'USD', 'SGD', 'EUR', 'HKD', 'GBP', 'CAD', 'CHF', 'PKR', 'INR'].includes(currency.toUpperCase())) {
+            unit = `1 ${currency.toUpperCase()}`;
+        } else if (['THB', 'TWD', 'CNY'].includes(currency.toUpperCase())) {
+            unit = `100 ${currency.toUpperCase()}`;
+        } else if (['JPY'].includes(currency.toUpperCase())) {
+            unit = `1000 ${currency.toUpperCase()}`;
+        } else if (['IDR', 'VND'].includes(currency.toUpperCase())) {
+            unit = `10000 ${currency.toUpperCase()}`;
+        } else if (['PHP'].includes(currency.toUpperCase())) {
+            unit = `100 ${currency.toUpperCase()}`;
+        } else {
+            unit = `1 ${currency.toUpperCase()}`; // Default fallback
+        }
+    }
+            return {
+                ...rate,
+                currency: currency.toUpperCase(),
+                region: locationLower.includes('kuala lumpur') || 
+                        locationLower.includes('bukit bintang') || 
+                        locationLower.includes('midvalley') || 
+                        locationLower.includes('nu sentral') || 
+                        locationLower.includes('avenue k') || 
+                        locationLower.includes('chow kit') || 
+                        locationLower.includes('ampang park') || 
+                        locationLower.includes('sungei wang') || 
+                        locationLower.includes('lot 10') || 
+                        locationLower.includes('shah alam') || 
+                        locationLower.includes('kuchai lama') || 
+                        locationLower.includes('melawati mall') || 
+                        locationLower.includes('seri kembangan') || 
+                        locationLower.includes('leisure mall') || 
+                        locationLower.includes('puchong') || 
+                        locationLower.includes('balakong') ? 'KL' :
+                        locationLower.includes('ipoh') ? 'Ipoh' :
+                        locationLower.includes('johor') || 
+                        locationLower.includes('johor bahru') ? 'Johor' :
+                        locationLower.includes('penang') || 
+                        locationLower.includes('george town') ? 'Penang' :
+                        'Unknown'
+            };
+        });
 
         return ratesWithDetails;
     } catch (error) {
