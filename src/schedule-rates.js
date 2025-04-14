@@ -1,13 +1,15 @@
-const cron = require('node-cron');
-const updateRates = require('./update-rates');
+const { exec } = require('child_process');
 
-// Schedule the updateRates function to run daily at 8:00 AM
-cron.schedule('0 8 * * *', () => {
-    console.log('Running daily update at', new Date().toISOString());
-    updateRates();
-}, {
-    scheduled: true,
-    timezone: "Asia/Kuala_Lumpur" // Adjust to your timezone
+console.log('Running rate update at', new Date().toISOString());
+exec('node src/update-rates.js', (err, stdout, stderr) => {
+    if (err) {
+        console.error('Error running update-rates.js:', err.message);
+        console.error('stderr:', stderr);
+        process.exit(1);
+    }
+    console.log('Rate update output:', stdout);
+    if (stderr) {
+        console.error('Rate update stderr:', stderr);
+    }
+    process.exit(0);
 });
-
-console.log('Cron job scheduled to run daily at 8:00 AM MYT.');
