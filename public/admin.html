@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Update Rates</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin - Update Rates</h1>
+        <p>Manually add or update exchange rates.</p>
+    </header>
+
+    <div class="container">
+        <!-- Add New Rate Section -->
+        <h2>Add New Rate</h2>
+        <form id="add-rate-form">
+            <label for="add-currency">Currency:</label>
+            <input type="text" id="add-currency" name="currency" required placeholder="e.g., AUD">
+
+            <label for="add-region">Region:</label>
+            <input type="text" id="add-region" name="region" required placeholder="e.g., KL">
+
+            <label for="add-money-changer">Money Changer:</label>
+            <input type="text" id="add-money-changer" name="money_changer" required placeholder="e.g., MAXMONEY">
+
+            <label for="add-buy-rate">Buy Rate:</label>
+            <input type="number" id="add-buy-rate" name="buy_rate" step="0.0001" required placeholder="e.g., 2.76">
+
+            <label for="add-sell-rate">Sell Rate:</label>
+            <input type="number" id="add-sell-rate" name="sell_rate" step="0.0001" required placeholder="e.g., 2.78">
+
+            <label for="add-location">Location:</label>
+            <input type="text" id="add-location" name="location" required placeholder="e.g., MIDVALLEY MEGAMALL">
+
+            <label for="add-unit">Unit:</label>
+            <input type="text" id="add-unit" name="unit" required placeholder="e.g., 1 AUD">
+
+            <button type="submit">Add Rate</button>
+        </form>
+        <p id="add-message"></p>
+
+        <!-- Update Existing Rate Section -->
+        <h2>Update Existing Rate</h2>
+        <div class="filters">
+            <label for="search-currency">Search by Currency:</label>
+            <input type="text" id="search-currency" placeholder="e.g., AUD">
+            <button id="search-button">Search</button>
+        </div>
+
+        <table id="existing-rates-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Currency</th>
+                    <th>Region</th>
+                    <th>Money Changer</th>
+                    <th>Buy Rate</th>
+                    <th>Sell Rate</th>
+                    <th>Location</th>
+                    <th>Updated At</th>
+                    <th>Unit</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="existing-rates-body">
+                <tr><td colspan="10">Search for rates to update...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <a href="/money-changers.html">Back to Rates</a>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/admin.js"></script>
+</body>
+</html>
