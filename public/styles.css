@@ -306,3 +306,23 @@ footer a:hover {
         max-width: 100%;
     }
 }
+
+/* New style for the header image */
+.header-image {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* New styles for We Buy and We Sell columns */
+#rates-table td:nth-child(3) {
+    color: green;
+    font-weight: bold;
+}
+
+#rates-table td:nth-child(4) {
+    color: red;
+    font-weight: bold;
+}
