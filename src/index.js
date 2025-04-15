@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const express = require('express');
 const { createClient } = require('@libsql/client');
 const path = require('path');
@@ -7,15 +11,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Initialize Turso client
 const db = createClient({
     url: process.env.TURSO_DB_URL,
     authToken: process.env.TURSO_DB_TOKEN
 });
 
-// Create the rates table if it doesn't exist
 db.execute(`
     CREATE TABLE IF NOT EXISTS rates (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,9 +37,8 @@ db.execute(`
     process.exit(1);
 });
 
-// Basic auth for admin routes
 const adminAuth = basicAuth({
-    users: { 'admin': 'supersecretpassword' },
+    users: { [process.env.ADMIN_USERNAME]: process.env.ADMIN_PASSWORD },
     challenge: true,
     realm: 'Admin Area'
 });
@@ -76,23 +77,26 @@ app.post('/api/rates/add', async (req, res) => {
     const { currency, region, money_changer, buy_rate, sell_rate, location, unit } = req.body;
 
     if (!currency || !region || !money_changer || !buy_rate || !sell_rate || !location || !unit) {
+        console.log('Validation failed. Request body:', req.body);
         return res.status(400).json({ error: 'All fields are required' });
     }
 
     const updatedAt = getCurrentTimestamp();
 
     try {
+        const args = [currency.toUpperCase(), region, money_changer, buy_rate, sell_rate, location, updatedAt, unit];
+        console.log('Insert args:', args);
         await db.execute({
             sql: `
                 INSERT INTO rates (currency, region, money_changer, buy_rate, sell_rate, location, updated_at, unit)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `,
-            args: [currency.toUpperCase(), region, money_changer, buy_rate, sell_rate, location, updatedAt, unit]
+            args
         });
         res.json({ message: 'Rate added successfully' });
     } catch (err) {
-        console.error('Error inserting rate:', err.message);
-        res.status(500).json({ error: 'Error adding rate' });
+        console.error('Error inserting rate:', err.message, 'Request body:', req.body);
+        res.status(500).json({ error: 'Error adding rate: ' + err.message });
     }
 });
 
@@ -123,15 +127,11 @@ app.put('/api/rates/update/:id', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'money-changers.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'money-changers.html'));
 });
 
 app.get('/money-changers.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'money-changers.html'));
-});
-
-app.get('/admin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'money-changers.html'));
 });
 
 app.listen(port, () => {
