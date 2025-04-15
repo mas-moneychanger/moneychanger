@@ -1,40 +1,51 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const { createClient } = require('@libsql/client');
 const path = require('path');
 const basicAuth = require('express-basic-auth');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware to parse JSON bodies
 app.use(express.json());
-
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up basic authentication for admin routes
+// Initialize Turso client
+const db = createClient({
+    url: process.env.TURSO_DB_URL,
+    authToken: process.env.TURSO_DB_TOKEN
+});
+
+// Create the rates table if it doesn't exist
+db.execute(`
+    CREATE TABLE IF NOT EXISTS rates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        currency TEXT NOT NULL,
+        region TEXT NOT NULL,
+        money_changer TEXT NOT NULL,
+        buy_rate REAL NOT NULL,
+        sell_rate REAL NOT NULL,
+        location TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        unit TEXT NOT NULL
+    )
+`).then(() => {
+    console.log('Connected to Turso database.');
+}).catch(err => {
+    console.error('Error connecting to Turso database:', err.message);
+    process.exit(1);
+});
+
+// Basic auth for admin routes
 const adminAuth = basicAuth({
-    users: { 'admin': 'supersecretpassword' }, // Replace with your username and password
+    users: { 'admin': 'supersecretpassword' },
     challenge: true,
     realm: 'Admin Area'
 });
 
-// Apply authentication to admin routes
 app.use('/admin.html', adminAuth);
 app.use('/api/rates/add', adminAuth);
 app.use('/api/rates/update', adminAuth);
 
-// Initialize SQLite database
-const dbPath = path.join(__dirname, 'src', 'rates.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error opening database:', err.message);
-        process.exit(1);
-    }
-    console.log('Connected to SQLite database.');
-});
-
-// Function to get current timestamp
 function getCurrentTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -47,21 +58,21 @@ function getCurrentTimestamp() {
     return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
 }
 
-// Existing endpoint to get rates
-app.get('/api/rates', (req, res) => {
+app.get('/api/rates', async (req, res) => {
     const currency = req.query.currency || 'AUD';
-    db.all('SELECT * FROM rates WHERE currency = ?', [currency.toUpperCase()], (err, rows) => {
-        if (err) {
-            console.error('Error querying database:', err.message);
-            res.status(500).json({ error: 'Error fetching rates' });
-            return;
-        }
-        res.json(rows);
-    });
+    try {
+        const result = await db.execute({
+            sql: 'SELECT * FROM rates WHERE currency = ?',
+            args: [currency.toUpperCase()]
+        });
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error querying database:', err.message);
+        res.status(500).json({ error: 'Error fetching rates' });
+    }
 });
 
-// New endpoint to add a rate
-app.post('/api/rates/add', (req, res) => {
+app.post('/api/rates/add', async (req, res) => {
     const { currency, region, money_changer, buy_rate, sell_rate, location, unit } = req.body;
 
     if (!currency || !region || !money_changer || !buy_rate || !sell_rate || !location || !unit) {
@@ -70,35 +81,22 @@ app.post('/api/rates/add', (req, res) => {
 
     const updatedAt = getCurrentTimestamp();
 
-    const insertStmt = db.prepare(`
-        INSERT INTO rates (currency, region, money_changer, buy_rate, sell_rate, location, updated_at, unit)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    insertStmt.run(
-        currency.toUpperCase(),
-        region,
-        money_changer,
-        buy_rate,
-        sell_rate,
-        location,
-        updatedAt,
-        unit,
-        (err) => {
-            if (err) {
-                console.error('Error inserting rate:', err.message);
-                res.status(500).json({ error: 'Error adding rate' });
-            } else {
-                res.json({ message: 'Rate added successfully' });
-            }
-        }
-    );
-
-    insertStmt.finalize();
+    try {
+        await db.execute({
+            sql: `
+                INSERT INTO rates (currency, region, money_changer, buy_rate, sell_rate, location, updated_at, unit)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+            args: [currency.toUpperCase(), region, money_changer, buy_rate, sell_rate, location, updatedAt, unit]
+        });
+        res.json({ message: 'Rate added successfully' });
+    } catch (err) {
+        console.error('Error inserting rate:', err.message);
+        res.status(500).json({ error: 'Error adding rate' });
+    }
 });
 
-// New endpoint to update a rate
-app.put('/api/rates/update/:id', (req, res) => {
+app.put('/api/rates/update/:id', async (req, res) => {
     const id = req.params.id;
     const { buy_rate, sell_rate } = req.body;
 
@@ -108,31 +106,22 @@ app.put('/api/rates/update/:id', (req, res) => {
 
     const updatedAt = getCurrentTimestamp();
 
-    const updateStmt = db.prepare(`
-        UPDATE rates
-        SET buy_rate = ?, sell_rate = ?, updated_at = ?
-        WHERE id = ?
-    `);
-
-    updateStmt.run(
-        buy_rate,
-        sell_rate,
-        updatedAt,
-        id,
-        (err) => {
-            if (err) {
-                console.error('Error updating rate:', err.message);
-                res.status(500).json({ error: 'Error updating rate' });
-            } else {
-                res.json({ message: 'Rate updated successfully' });
-            }
-        }
-    );
-
-    updateStmt.finalize();
+    try {
+        await db.execute({
+            sql: `
+                UPDATE rates
+                SET buy_rate = ?, sell_rate = ?, updated_at = ?
+                WHERE id = ?
+            `,
+            args: [buy_rate, sell_rate, updatedAt, id]
+        });
+        res.json({ message: 'Rate updated successfully' });
+    } catch (err) {
+        console.error('Error updating rate:', err.message);
+        res.status(500).json({ error: 'Error updating rate' });
+    }
 });
 
-// Serve HTML pages
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'money-changers.html'));
 });
