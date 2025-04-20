@@ -70,6 +70,7 @@ app.get('/api/rates', async (req, res) => {
             `,
             args: [currency.toUpperCase()]
         });
+        res.set('Cache-Control', 'no-store'); // Prevent caching
         res.json(result.rows);
     } catch (err) {
         console.error('Error querying database:', err.message);
