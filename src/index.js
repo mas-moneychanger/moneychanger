@@ -60,20 +60,18 @@ function getCurrentTimestamp() {
 }
 
 app.get('/api/rates', async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     const currency = req.query.currency || 'AUD';
     try {
-        const result = await db.execute({
-            sql: `
-                SELECT * FROM rates
-                WHERE currency = ?
-                ORDER BY updated_at DESC
-            `,
-            args: [currency.toUpperCase()]
+        const { rows } = await db.execute({
+            sql: 'SELECT * FROM rates WHERE currency = ?',
+            args: [currency]
         });
-        res.set('Cache-Control', 'no-store'); // Prevent caching
-        res.json(result.rows);
+        res.json(rows);
     } catch (err) {
-        console.error('Error querying database:', err.message);
+        console.error('Error fetching rates:', err);
         res.status(500).json({ error: 'Error fetching rates' });
     }
 });
