@@ -37,7 +37,12 @@ async function updateRates() {
             console.error(`Error deleting existing rates for ${currency}:`, err.message);
             continue;
         }
+        
+        module.exports = updateRates;
 
+        if (require.main === module) {
+            updateRates();
+        }
         // Insert new rates
         for (const rate of rates) {
             try {

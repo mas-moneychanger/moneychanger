@@ -140,3 +140,15 @@ app.get('/money-changers.html', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+
+const updateRates = require('./update-rates');
+
+app.post('/admin/update-rates', async (req, res) => {
+    try {
+        await updateRates();
+        res.json({ message: 'Rates updated successfully' });
+    } catch (err) {
+        console.error('Error updating rates:', err);
+        res.status(500).json({ error: 'Error updating rates' });
+    }
+});
