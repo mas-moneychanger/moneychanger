@@ -13,6 +13,8 @@ $(document).ready(function() {
             updated_at: new Date().toISOString().replace('T', ' ').split('.')[0] // e.g., "2025-04-20 01:48:00"
         };
 
+        console.log('Submitting rate:', formData);
+
         $.ajax({
             url: '/admin/add-rate',
             method: 'POST',
@@ -23,9 +25,9 @@ $(document).ready(function() {
                 alert('Rate added successfully!');
                 $('#add-rate-form')[0].reset();
             },
-            error: function(err) {
-                console.error('Error adding rate:', err);
-                alert('Failed to add rate: ' + err.responseJSON?.error || 'Unknown error');
+            error: function(xhr, status, error) {
+                console.error('Error adding rate:', { status: xhr.status, response: xhr.responseJSON, error });
+                alert('Failed to add rate: ' + (xhr.responseJSON?.error || 'Unknown error'));
             }
         });
     });
@@ -34,6 +36,8 @@ $(document).ready(function() {
     $('#search-rates-form').on('submit', function(event) {
         event.preventDefault();
         const currency = $('#search-currency').val();
+
+        console.log('Searching rates for currency:', currency);
 
         $.ajax({
             url: `/admin/search-rates?currency=${currency}&t=${new Date().getTime()}`,
@@ -62,9 +66,9 @@ $(document).ready(function() {
                     tbody.append(row);
                 });
             },
-            error: function(err) {
-                console.error('Error fetching rates:', err);
-                alert('Failed to fetch rates: ' + err.responseJSON?.error || 'Unknown error');
+            error: function(xhr, status, error) {
+                console.error('Error fetching rates:', { status: xhr.status, response: xhr.responseJSON, error });
+                alert('Failed to fetch rates: ' + (xhr.responseJSON?.error || 'Unknown error'));
             }
         });
     });
