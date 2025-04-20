@@ -1,38 +1,71 @@
-$('#add-rate-form').on('submit', function(e) {
-    e.preventDefault();
+$(document).ready(function() {
+    // Add Rate Form Submission
+    $('#add-rate-form').on('submit', function(event) {
+        event.preventDefault();
+        const formData = {
+            currency: $('#currency').val(),
+            region: $('#region').val(),
+            money_changer: $('#money-changer').val(),
+            buy_rate: parseFloat($('#buy-rate').val()),
+            sell_rate: parseFloat($('#sell-rate').val()),
+            location: $('#location').val(),
+            unit: $('#unit').val(),
+            updated_at: new Date().toISOString().replace('T', ' ').split('.')[0] // e.g., "2025-04-20 01:48:00"
+        };
 
-    const newRate = {
-        currency: $('#add-currency').val().toUpperCase(),
-        region: $('#add-region').val(),
-        money_changer: $('#add-money-changer').val(),
-        buy_rate: parseFloat($('#add-buy-rate').val()),
-        sell_rate: parseFloat($('#add-sell-rate').val()),
-        location: $('#add-location').val(),
-        unit: $('#add-unit').val()
-    };
+        $.ajax({
+            url: '/admin/add-rate',
+            method: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(response) {
+                console.log('Rate added successfully:', response);
+                alert('Rate added successfully!');
+                $('#add-rate-form')[0].reset();
+            },
+            error: function(err) {
+                console.error('Error adding rate:', err);
+                alert('Failed to add rate: ' + err.responseJSON?.error || 'Unknown error');
+            }
+        });
+    });
 
-    // Validate inputs
-    if (!newRate.currency || !newRate.region || !newRate.money_changer || !newRate.location || !newRate.unit) {
-        $('#add-message').text('All fields are required.').css('color', 'red');
-        return;
-    }
-    if (isNaN(newRate.buy_rate) || isNaN(newRate.sell_rate)) {
-        $('#add-message').text('Buy and sell rates must be valid numbers.').css('color', 'red');
-        return;
-    }
+    // Search Rates
+    $('#search-rates-form').on('submit', function(event) {
+        event.preventDefault();
+        const currency = $('#search-currency').val();
 
-    $.ajax({
-        url: '/api/rates/add',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(newRate),
-        success: function(response) {
-            $('#add-message').text('Rate added successfully!').css('color', 'green');
-            $('#add-rate-form')[0].reset();
-        },
-        error: function(err) {
-            $('#add-message').text('Error adding rate. Please try again.').css('color', 'red');
-            console.error('Error adding rate:', err);
-        }
+        $.ajax({
+            url: `/admin/search-rates?currency=${currency}&t=${new Date().getTime()}`,
+            method: 'GET',
+            cache: false,
+            success: function(rates) {
+                console.log('Fetched rates:', rates);
+                const tbody = $('#admin-rates-body');
+                tbody.empty();
+
+                if (!rates || rates.length === 0) {
+                    tbody.html('<tr><td colspan="6">No rates found.</td></tr>');
+                    return;
+                }
+
+                rates.forEach(rate => {
+                    const row = $('<tr></tr>');
+                    row.html(`
+                        <td>${rate.money_changer || 'N/A'}</td>
+                        <td>${rate.location || 'N/A'}</td>
+                        <td>${rate.unit || 'N/A'}</td>
+                        <td>${rate.buy_rate ?? 'N/A'}</td>
+                        <td>${rate.sell_rate ?? 'N/A'}</td>
+                        <td>${rate.updated_at || 'N/A'}</td>
+                    `);
+                    tbody.append(row);
+                });
+            },
+            error: function(err) {
+                console.error('Error fetching rates:', err);
+                alert('Failed to fetch rates: ' + err.responseJSON?.error || 'Unknown error');
+            }
+        });
     });
 });
