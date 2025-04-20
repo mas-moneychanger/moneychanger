@@ -63,7 +63,11 @@ app.get('/api/rates', async (req, res) => {
     const currency = req.query.currency || 'AUD';
     try {
         const result = await db.execute({
-            sql: 'SELECT * FROM rates WHERE currency = ?',
+            sql: `
+                SELECT * FROM rates
+                WHERE currency = ?
+                ORDER BY updated_at DESC
+            `,
             args: [currency.toUpperCase()]
         });
         res.json(result.rows);
