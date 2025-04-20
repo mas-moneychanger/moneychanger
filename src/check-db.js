@@ -1,13 +1,22 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+require('dotenv').config();
+const { createClient } = require('@libsql/client');
 
-const db = new sqlite3.Database(path.join(__dirname, 'rates.db'));
-db.all("SELECT * FROM exchange_rates", [], (err, rows) => {
-    if (err) {
-        console.error('Error querying database:', err);
-    } else {
-        console.log('Current data in exchange_rates:');
-        console.table(rows);
+const db = createClient({
+    url: process.env.TURSO_DB_URL,
+    authToken: process.env.TURSO_DB_TOKEN
+});
+
+async function checkDb() {
+    try {
+        const result = await db.execute('SELECT * FROM rates');
+        console.table(result.rows);
+    } catch (err) {
+        console.error('Error querying database:', err.message);
+        process.exit(1);
     }
-    db.close();
+}
+
+checkDb().catch((err) => {
+    console.error('Error:', err);
+    process.exit(1);
 });

@@ -1,22 +1,34 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+require('dotenv').config();
+const { createClient } = require('@libsql/client');
 
-const db = new sqlite3.Database(path.join(__dirname, 'rates.db'));
-
-db.serialize(() => {
-    db.run(`
-        CREATE TABLE IF NOT EXISTS exchange_rates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            currency TEXT NOT NULL,
-            region TEXT,
-            money_changer TEXT,
-            buy_rate REAL,
-            sell_rate REAL,
-            location TEXT,
-            updated_at TEXT,
-            unit TEXT
-        )
-    `);
+const db = createClient({
+    url: process.env.TURSO_DB_URL,
+    authToken: process.env.TURSO_DB_TOKEN
 });
 
-db.close();
+async function initDb() {
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS rates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                currency TEXT NOT NULL,
+                region TEXT NOT NULL,
+                money_changer TEXT NOT NULL,
+                buy_rate REAL NOT NULL,
+                sell_rate REAL NOT NULL,
+                location TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                unit TEXT NOT NULL
+            )
+        `);
+        console.log('Rates table created or already exists.');
+    } catch (err) {
+        console.error('Error creating table:', err.message);
+        process.exit(1);
+    }
+}
+
+initDb().catch((err) => {
+    console.error('Error:', err);
+    process.exit(1);
+});
