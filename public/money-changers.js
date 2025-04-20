@@ -4,8 +4,8 @@ $(document).ready(function() {
     let selectedCurrency = urlParams.get('currency') || 'AUD';
 
     // Set the currency dropdown value and title
-    $('#currency-select').val(selectedCurrency);
-    $('#currency-title').text(`${selectedCurrency.toUpperCase()} Rates`);
+   // $('#currency-select').val(selectedCurrency);
+    //$('#currency-title').text(`${selectedCurrency.toUpperCase()} Rates`);
 
     // Function to parse dates in the format "2025-04-11 10:52 AM"
     function parseDate(dateStr) {
